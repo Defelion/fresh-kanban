@@ -17,8 +17,8 @@
           variant="underlined"
         />
         <v-textarea
-          label="Beskrivelse"
           auto-grow
+          label="Beskrivelse"
           variant="underlined"
         />
 
