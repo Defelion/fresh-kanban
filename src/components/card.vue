@@ -6,8 +6,8 @@
   <v-container class="d-flex justify-center align-center fill-height">
     <v-card
       class="mx-auto"
-      width="100%"
       elevation="5"
+      width="100%"
     >
       <v-container class="justify-center align-center">
         <v-text-field
@@ -18,8 +18,8 @@
         />
         <v-textarea
           label="Beskrivelse"
-          variant="underlined"
           auto-grow
+          variant="underlined"
         />
 
       </v-container>
