@@ -3,7 +3,6 @@
 </script>
 
 <template>
-  <v-app>
     <v-app-bar>
       <v-container class="d-flex justify-center align-center">
         <v-row align="center" justify="center" no-gutters>
@@ -23,7 +22,6 @@
         </v-row>
       </v-container>
     </v-app-bar>
-  </v-app>
 </template>
 
 <style scoped lang="sass">

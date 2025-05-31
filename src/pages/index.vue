@@ -1,5 +1,7 @@
 <template>
-  <board />
+  <AppHeader />
+  <column />
+  <AppFooter />
 </template>
 
 <script lang="ts" setup>
