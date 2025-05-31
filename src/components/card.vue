@@ -3,11 +3,29 @@
 </script>
 
 <template>
-  <div class="card-container">
-    <p>juhuu</p>
-  </div>
+  <v-container class="d-flex justify-center align-center fill-height">
+    <v-card
+      class="mx-auto"
+      width="100%"
+      elevation="5"
+    >
+      <v-container class="justify-center align-center">
+        <v-text-field
+          class="mt-5"
+          density="compact"
+          label="title"
+          variant="underlined"
+        />
+        <v-textarea
+          label="Beskrivelse"
+          variant="underlined"
+          auto-grow
+        />
+
+      </v-container>
+    </v-card>
+  </v-container>
 </template>
 
 <style scoped lang="sass">
-
 </style>

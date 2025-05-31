@@ -1,6 +1,6 @@
 <template>
   <AppHeader />
-  <column />
+  <board />
   <AppFooter />
 </template>
 
