@@ -5,9 +5,10 @@
   const columns = ref([
     { id: 'col1', cards: [] },
   ])
+  const nextId = 0;
 
   function addColumn () {
-    const nextId = `col${columns.value.length + 1}`
+    const nextId = `col${nextId++}`;
     columns.value.push({ id: nextId, cards: [] })
   }
 
@@ -23,7 +24,7 @@
         v-for="(col) in columns"
         :key="col.id"
       >
-        <column :colum-id="col.id" @remove="removeColumn" />
+        <column :column-id="col.id" @remove="removeColumn" />
       </v-col>
       <v-col cols="auto">
         <v-btn

@@ -1,112 +1,129 @@
 <script setup lang="ts">
-  import { ref } from 'vue'
   import Card from '@/components/card.vue'
   import { useDragStore } from '@/stores/dragStore.ts';
+  import { useCardStore } from '@/stores/cardStore.ts';
 
   const dragStore = useDragStore();
-  const prop = defineProps<{ columId: string }>()
+  const cardStore = useCardStore();
+  const prop = defineProps<{ columnId: string }>()
   const emit = defineEmits<{
     (e: 'remove', id: string): void
-    (e: 'card-dropped', payload: { card: never, targetColId: string }): void
   }>()
-  const cards = ref([
-    { id: 'ca1', title: '', description: '' },
-  ])
+
+  const cards = computed(() => cardStore.cardsByColumn(prop.columnId));
 
   function addCard () {
-    const nextId = `ca${cards.value.length + 1}`
-    cards.value.push({ id: nextId, title: '', description: '' })
+    cardStore.addCard(prop.columnId,'','');
   }
 
-  function updateCard (cardId: string, cardTitle: string, cardDescription: string) {
-    for (const card of cards.value) {
-      if (card.id === cardId) {
-        card.title = cardTitle
-        card.description = cardDescription
-        break
-      }
-    }
+  function onDragOver (e: DragEvent) {
+    e.preventDefault()
+    if (e.dataTransfer)
+      e.dataTransfer.dropEffect = 'move';
+
+    if(!dragStore.hoverCardId)
+      dragStore.setHoverCardId(prop.columnId);
   }
 
-  function removeCard (cardId: string) {
-    cards.value = cards.value.filter(card => card.id !== cardId)
+  function onDragLeave () {
+    if (dragStore.hoverCardId === prop.columnId)
+      dragStore.setHoverCardId(null);
   }
 
-  function onDrop () {
-    const draggedCard =dragStore.draggedCard
-    if (!draggedCard) return
-    if (draggedCard.fromColumnId !== prop.columId) {
-      cards.value.push({
-        id: draggedCard.cardId,
-        title: draggedCard.cardTitle,
-        description: draggedCard.cardDescription,
-      })
-    }
+  function onDrop (e: DragEvent) {
+    e.preventDefault()
 
-    dragStore.clearDraggedCard()
+    const draggedCard = dragStore.draggedCard;
+    if (!draggedCard) return;
+
+    dragStore.setHoverCardId(null);
+
+    cardStore.moveCard(
+      draggedCard.cardId,
+      prop.columnId,
+      null
+    )
+
+    dragStore.clearDraggedCard();
   }
   function removeColumn () {
-    emit('remove', prop.columId)
+    for (const card of cardStore.cardsByColumn(prop.columnId)) {
+      cardStore.removeCard(card.id);
+    }
+    emit('remove', prop.columnId)
   }
 </script>
 
 <template>
-  <v-row no-gutters>
-    <v-col>
-      <v-text-field
-        :id="columId"
-        class="mt-3"
-        density="compact"
-        label="Status Kolonne"
-        variant="underlined"
-      />
-    </v-col>
-    <v-col cols="auto">
-      <v-btn
-        class="mt-5"
-        color="error"
-        icon
-        size="extra-small"
-        variant="text"
-        @click="removeColumn"
-      >
-        <v-icon>mdi-close</v-icon>
-      </v-btn>
-    </v-col>
-  </v-row>
-  <v-row
-    v-for="(card) in cards"
-    :key="card.id"
+  <v-card
+    :class="{ 'hovering-column': dragStore.hoverCardId === `column-${prop.columnId}` }"
+    variant="tonal"
+    @dragleave="onDragLeave"
+    @dragover="onDragOver"
+    @drop="onDrop"
   >
-    <v-col>
-      <card
-        :card-value="{
-          cardId: card.id,
-          cardTitle: card.title,
-          cardDescription: card.description,
-          columId: prop.columId
-        }"
-        @drop="onDrop"
-        @remove="removeCard"
-        @update="updateCard"
-      />
-    </v-col>
-  </v-row>
-  <v-row>
-    <v-col>
-      <v-btn
-        height="100%"
-        value="addCard"
-        variant="tonal"
-        width="100%"
-        @click="addCard"
-      >
-        <v-icon size="x-large">mdi-plus</v-icon>
-      </v-btn>
-    </v-col>
-  </v-row>
+    <v-row
+      class="ma-2"
+      no-gutters
+    >
+      <v-col>
+        <v-text-field
+          :id="columnId"
+          class="mt-3"
+          density="compact"
+          label="Status Kolonne"
+          variant="underlined"
+        />
+      </v-col>
+      <v-col cols="auto">
+        <v-btn
+          class="mt-5"
+          color="error"
+          icon
+          size="extra-small"
+          variant="text"
+          @click="removeColumn"
+        >
+          <v-icon>mdi-close</v-icon>
+        </v-btn>
+      </v-col>
+    </v-row>
+    <v-row
+      v-for="(card) in cards"
+      :key="card.id"
+    >
+      <v-col>
+        <card
+          :card-value="{
+            id: card.id,
+            title: card.title,
+            description: card.description,
+            columnId: prop.columnId
+          }"
+          @drop="onDrop"
+        />
+      </v-col>
+    </v-row>
+    <v-row>
+      <v-col>
+        <v-btn
+          height="100%"
+          value="addCard"
+          variant="tonal"
+          width="100%"
+          @click="addCard"
+        >
+          <v-icon size="x-large">mdi-plus</v-icon>
+        </v-btn>
+      </v-col>
+    </v-row>
+  </v-card>
 </template>
 
 <style scoped lang="sass">
-
+.column
+  transition: background-color 0.2s ease-in-out, border-color 0.2s ease-in-out
+.hovering-column
+  background-color: #e0f2f7
+  border: 2px dashed #2196F3
 </style>
