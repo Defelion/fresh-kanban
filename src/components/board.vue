@@ -3,12 +3,12 @@
   import Column from '@/components/column.vue'
 
   const columns = ref([
-    { id: '1', cards: ['Card 1'] },
+    { id: 'col1', cards: [] },
   ])
 
   function addColumn () {
-    const nextId = `${columns.value.length + 1}`
-    columns.value.push({ id: nextId })
+    const nextId = `col${columns.value.length + 1}`
+    columns.value.push({ id: nextId, cards: [] })
   }
 
   function removeColumn (id: string) {
