@@ -1,6 +1,6 @@
 import { defineStore } from 'pinia'
 
-export const useDragStore = defineStore('dragStore', {
+export const useCardDragStore = defineStore('cardDragStore', {
   state: () => ({
     draggedCard: null as null | {
       cardId: string,
@@ -9,6 +9,7 @@ export const useDragStore = defineStore('dragStore', {
       fromColumnId: string,
     },
     hoverCardId: null as string | null,
+    hoverColumnId: null as string | null,
   }),
   actions: {
     setDraggedCard (card: typeof this.draggedCard) {
@@ -19,6 +20,9 @@ export const useDragStore = defineStore('dragStore', {
     },
     setHoverCardId (cardId: string | null) {
       this.hoverCardId = cardId
+    },
+    setHoverColumnId (columnId: string | null) {
+      this.hoverColumnId = columnId
     },
   },
 })

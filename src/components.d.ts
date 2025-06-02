@@ -12,6 +12,7 @@ declare module 'vue' {
     AppHeader: typeof import('./components/AppHeader.vue')['default']
     Board: typeof import('./components/board.vue')['default']
     Card: typeof import('./components/card.vue')['default']
+    CardListView: typeof import('./components/cardListView.vue')['default']
     Column: typeof import('./components/column.vue')['default']
     HelloWorld: typeof import('./components/HelloWorld.vue')['default']
     RouterLink: typeof import('vue-router')['RouterLink']

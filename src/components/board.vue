@@ -1,20 +1,15 @@
 <script setup lang="ts">
-  import { ref } from 'vue'
   import Column from '@/components/column.vue'
+  import { useColumnStore } from '@/stores/columnStore.ts';
 
-  const columns = ref([
-    { id: 'col1', cards: [] },
-  ])
-  const nextId = 0;
+  const columnStore = useColumnStore();
+
+  const columns = computed(() => columnStore.columns)
 
   function addColumn () {
-    const nextId = `col${nextId++}`;
-    columns.value.push({ id: nextId, cards: [] })
+    columnStore.addColumn();
   }
 
-  function removeColumn (id: string) {
-    columns.value = columns.value.filter(col => col.id !== id)
-  }
 </script>
 
 <template>
@@ -24,7 +19,11 @@
         v-for="(col) in columns"
         :key="col.id"
       >
-        <column :column-id="col.id" @remove="removeColumn" />
+        <column :column-value="{
+          id: col.id,
+          title: ''
+        }"
+        />
       </v-col>
       <v-col cols="auto">
         <v-btn
@@ -41,7 +40,7 @@
       <v-col>
         <v-btn
           height="100%"
-          min-height="365px"
+          min-height="100px"
           value="addColumn"
           variant="tonal"
           width="100%"

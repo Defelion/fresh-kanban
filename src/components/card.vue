@@ -1,14 +1,15 @@
 <script setup lang="ts">
   import { reactive, watch } from 'vue'
-  import { useDragStore } from '@/stores/dragStore.ts';
   import { useCardStore } from '@/stores/cardStore.ts';
+  import { useCardDragAndDrop } from '@/composables/useCardDragAndDrop.ts';
 
-  const dragStore = useDragStore();
   const cardStore = useCardStore();
   const prop = defineProps<{
     cardValue: { id: string, title: string, description: string, columnId: string }
   }>();
   const localCard = reactive({ ...prop.cardValue });
+  const { onDragOver, onDragLeave, onDrop, onDragStart, isDragging, isHovering }
+    = useCardDragAndDrop( 'card' , localCard.id, localCard.columnId);
 
   watch(
     () => ({ ...localCard }),
@@ -24,57 +25,10 @@
     }
   );
 
-  function onDragStart (e: DragEvent) {
-    if(e.dataTransfer) {
-      e.dataTransfer.setData('text/plain', localCard.id);
-      e.dataTransfer.effectAllowed = 'move';
-    }
-
-    dragStore.setDraggedCard({
-      cardId: localCard.id,
-      cardTitle: localCard.title,
-      cardDescription: localCard.description,
-      fromColumnId: localCard.columnId,
-    })
-  }
-
-  function onDragOver (e: DragEvent) {
-    e.preventDefault();
-    if (e.dataTransfer) {
-      e.dataTransfer.dropEffect = 'move';
-    }
-
-    if(dragStore.hoverCardId !== localCard.id) {
-      dragStore.setHoverCardId(localCard.id);
-    }
-  }
-
-  function onDragLeave () {
-    if(dragStore.hoverCardId === localCard.id) {
-      dragStore.setHoverCardId(null);
-    }
-  }
-
-  function onDrop (e: DragEvent) {
-    e.preventDefault();
-
-    const draggedCardInfo = dragStore.draggedCard;
-
-    if (draggedCardInfo && draggedCardInfo.cardId !== localCard.id) {
-      cardStore.moveCard(
-        draggedCardInfo.cardId,
-        localCard.columnId,
-        localCard.id
-      );
-    }
-
-    dragStore.clearDraggedCard();
-    dragStore.setHoverCardId(null);
-  }
-
   function removeCard () {
     cardStore.removeCard(localCard.id);
   }
+
 </script>
 
 <template>
@@ -82,15 +36,15 @@
     :id="localCard.id"
     class="mx-auto"
     :class="{
-      'dragging': dragStore.draggedCard?.cardId === localCard.id,
-      'hovering': dragStore.hoverCardId === localCard.id
+      'dragging': isDragging,
+      'hovering': isHovering
     }"
     draggable="true"
     elevation="5"
     width="97%"
     @dragleave="onDragLeave"
     @dragover="onDragOver"
-    @dragstart="onDragStart"
+    @dragstart="e => onDragStart(e, localCard)"
     @drop="onDrop"
   >
     <v-container class="justify-center align-center">
