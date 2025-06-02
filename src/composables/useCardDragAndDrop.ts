@@ -1,12 +1,13 @@
 import { useCardStore } from '@/stores/cardStore.ts';
 import { useCardDragStore } from '@/stores/cardDragStore.ts';
-
+import { useColumnDragStore } from '@/stores/columnDragStore.ts';
 
 export function useCardDragAndDrop (
   type: 'card' | 'column',
   id: string,
-  currentColumnId?: string
+  currentColumnId: string | null
 ) {
+  const columnDragStore = useColumnDragStore();
   const cardDragStore = useCardDragStore();
   const cardStore = useCardStore();
 
@@ -18,7 +19,12 @@ export function useCardDragAndDrop (
       description: string,
       columnId: string
     }) {
-    if(e.dataTransfer) {
+    columnDragStore.setHoverColumnId(null);
+    columnDragStore.clearDraggedColumn();
+    cardDragStore.setHoverCardId(null);
+    cardDragStore.setHoverColumnId(null);
+    cardDragStore.clearDraggedCard();
+    if (e.dataTransfer) {
       e.dataTransfer.setData('text/plain', cardValue.id);
       e.dataTransfer.effectAllowed = 'move';
     }
@@ -36,10 +42,19 @@ export function useCardDragAndDrop (
     if (e.dataTransfer)
       e.dataTransfer.dropEffect = 'move';
 
-    if(!cardDragStore.hoverColumnId && type === 'column')
+    if (type === 'column') {
       cardDragStore.setHoverColumnId(id);
-    else if (cardDragStore.hoverColumnId && type === 'card')
-      cardDragStore.setHoverCardId(id)
+      const storeHoverCardId = cardDragStore.hoverCardId;
+      if (storeHoverCardId) {
+        const hoveredCard = cardStore.cards.find(c => c.id === storeHoverCardId);
+        if (!hoveredCard || hoveredCard.columnId !== id)
+          cardDragStore.setHoverCardId(null);
+      }
+    } else if (type === 'card') {
+      if (currentColumnId)
+        cardDragStore.setHoverColumnId(currentColumnId);
+      cardDragStore.setHoverCardId(id);
+    }
   }
 
   function onDragLeave () {
@@ -56,13 +71,15 @@ export function useCardDragAndDrop (
     const draggedCard = cardDragStore.draggedCard;
     if (!draggedCard) return;
 
-    if (type === 'card' && draggedCard.cardId !== id) {
+    if (type === 'card' && draggedCard.cardId !== id && currentColumnId !== null) {
+      console.log(`[onDrop - type:card] Moving card ${draggedCard.cardId} to column ${currentColumnId} before card ${id}`);
       cardStore.moveCard(
         draggedCard.cardId,
-        currentColumnId || draggedCard.fromColumnId,
+        currentColumnId,
         id
       )
     } else if (type === 'column') {
+      console.log(`[onDrop - type:column] Moving card ${draggedCard.cardId} to column ${id}`);
       cardStore.moveCard(
         draggedCard.cardId,
         id,
@@ -71,8 +88,21 @@ export function useCardDragAndDrop (
     }
 
     cardDragStore.setHoverCardId(null);
-    cardDragStore.setHoverColumnId(null)
+    cardDragStore.setHoverColumnId(null);
     cardDragStore.clearDraggedCard();
+  }
+
+  function onDragEnd () {
+    setTimeout(() => {
+      if (cardDragStore.draggedCard
+        && cardDragStore.draggedCard.cardId === id
+        && type === 'card') {
+        console.log(`[useCardDragAndDrop@${id}] onDragEndCard - rydder draggedCard: ${cardDragStore.draggedCard.cardId}`);
+        cardDragStore.clearDraggedCard();
+      }
+      cardDragStore.setHoverCardId(null);
+      cardDragStore.setHoverColumnId(null);
+    }, 0)
   }
 
   function removeCards () {
@@ -80,19 +110,20 @@ export function useCardDragAndDrop (
       cardStore.removeCard(card.id);
   }
 
-  function addCard () {
-    cardStore.addCard(id,'','');
-  }
 
   return {
     onDragStart,
     onDragOver,
     onDragLeave,
     onDrop,
-    addCard,
+    onDragEnd,
     removeCards,
-    isHoveringColumn: computed(() => cardDragStore.hoverColumnId === id),
-    isHovering: computed(() => cardDragStore.hoverCardId === id && type === 'column'),
-    isDragging: computed(() => cardDragStore.hoverCardId === id && type === 'card'),
+    isHoveringColumn: computed(() => cardDragStore.hoverColumnId === id
+      && type === 'column'),
+    isHovering: computed(() => cardDragStore.hoverCardId === id
+      && type === 'card'
+      && cardDragStore.draggedCard?.cardId !== id),
+    isDragging: computed(() => cardDragStore.draggedCard?.cardId === id
+      && type === 'card'),
   }
 }

@@ -8,7 +8,7 @@
     cardValue: { id: string, title: string, description: string, columnId: string }
   }>();
   const localCard = reactive({ ...prop.cardValue });
-  const { onDragOver, onDragLeave, onDrop, onDragStart, isDragging, isHovering }
+  const { onDragEnd, onDragOver, onDragLeave, onDrop, onDragStart, isDragging, isHovering }
     = useCardDragAndDrop( 'card' , localCard.id, localCard.columnId);
 
   watch(
@@ -42,6 +42,7 @@
     draggable="true"
     elevation="5"
     width="97%"
+    @dragend="onDragEnd"
     @dragleave="onDragLeave"
     @dragover="onDragOver"
     @dragstart="e => onDragStart(e, localCard)"

@@ -1,17 +1,24 @@
 import { useColumnStore } from '@/stores/columnStore.ts';
 import { useColumnDragStore } from '@/stores/columnDragStore.ts';
+import { useCardDragStore } from '@/stores/cardDragStore.ts';
 
 export function useColumnDragAndDrop (columnId: string, columnTitle: string) {
   const columnStore = useColumnStore();
-  const dragstore = useColumnDragStore();
+  const columnDragStore = useColumnDragStore();
+  const cardDragStore = useCardDragStore();
 
   function onDragStartColumn (e: DragEvent) {
+    columnDragStore.setHoverColumnId(null);
+    columnDragStore.clearDraggedColumn();
+    cardDragStore.setHoverCardId(null);
+    cardDragStore.setHoverColumnId(null);
+    cardDragStore.clearDraggedCard();
     if (e.dataTransfer) {
       e.dataTransfer.setData('text/plain', columnId);
       e.dataTransfer.effectAllowed = 'move';
     }
 
-    dragstore.setDraggedColumn({
+    columnDragStore.setDraggedColumn({
       id: columnId,
       title: columnTitle,
     })
@@ -22,27 +29,36 @@ export function useColumnDragAndDrop (columnId: string, columnTitle: string) {
     if (e.dataTransfer)
       e.dataTransfer.dropEffect = 'move';
 
-    if(!dragstore.hoverColumnId)
-      dragstore.setHoverColumnId(columnId);
+    const currentDraggedColumnInStore = columnDragStore.draggedColumn;
+    const composableColumnId = columnId;
+    console.log('[onDragOverColumn DEBUG] Inden i funktion - columnId:', composableColumnId);
+    console.log('[onDragOverColumn DEBUG] Inden i funktion - columnDragStore.draggedColumn:', JSON.stringify(currentDraggedColumnInStore));
+
+    if (currentDraggedColumnInStore) {
+      console.log('[onDragOverColumn DEBUG] Sammenligning:', currentDraggedColumnInStore.id, '!==', composableColumnId, 'Resultat:', currentDraggedColumnInStore.id !== composableColumnId);
+    }
+
+    if(columnDragStore.draggedColumn && columnDragStore.draggedColumn.id !== columnId)
+      columnDragStore.setHoverColumnId(columnId);
   }
 
   function onDragLeaveColumn () {
-    if (dragstore.hoverColumnId === columnId)
-      dragstore.setHoverColumnId(null);
+    if (columnDragStore.hoverColumnId === columnId)
+      columnDragStore.setHoverColumnId(null);
   }
 
   function onDropColumn (e: DragEvent) {
     e.preventDefault()
 
-    const draggedColumn = dragstore.draggedColumn;
+    const draggedColumn = columnDragStore.draggedColumn;
 
     if (!draggedColumn) return;
 
     if(draggedColumn.id !== columnId)
-      columnStore.moveColumn(columnId, columnTitle)
+      columnStore.moveColumn(draggedColumn.id, columnId)
 
-    dragstore.setHoverColumnId(null);
-    dragstore.clearDraggedColumn();
+    columnDragStore.setHoverColumnId(null);
+    columnDragStore.clearDraggedColumn();
   }
 
   function removeColumn (columnId: string) {

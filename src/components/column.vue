@@ -1,20 +1,32 @@
 <script setup lang="ts">
+  import { reactive, watch } from 'vue'
   import { useCardDragAndDrop } from '@/composables/useCardDragAndDrop.ts';
   import { useColumnDragAndDrop } from '@/composables/useColumnDragAndDrop.ts';
   import CardListView from '@/components/cardListView.vue';
   import { useColumnDragStore } from '@/stores/columnDragStore.ts';
   import { useCardDragStore } from '@/stores/cardDragStore.ts';
+  import { useColumnStore } from '@/stores/columnStore.ts';
 
   const prop = defineProps<{
     columnValue: { id: string, title: string }
   }>();
   const columnDragStore = useColumnDragStore();
+  const localColumnStore = useColumnStore();
   const cardDragStore = useCardDragStore();
   const localColumn = reactive({ ...prop.columnValue });
   const { onDragOver, onDragLeave, onDrop, removeCards, isHoveringColumn }
-    = useCardDragAndDrop('column', prop.columnValue.id);
+    = useCardDragAndDrop('column', prop.columnValue.id, null);
   const { onDropColumn, onDragLeaveColumn, onDragOverColumn, onDragStartColumn, removeColumn }
     = useColumnDragAndDrop(localColumn.id, localColumn.title)
+
+  watch(
+    () => ({ ...localColumn }),
+    (newValue, oldValue) => {
+      if (newValue.title !== oldValue.title) {
+        localColumnStore.updateColumn({ ...localColumn })
+      }
+    }
+  )
 
   function onDragOverCombined (e: DragEvent) {
     e.preventDefault()
@@ -28,11 +40,15 @@
 
   function onDropCombined (e: DragEvent) {
     e.preventDefault()
-
-    if(columnDragStore.draggedColumn)
+    console.log(`[Column.vue onDropCombined] Drop registreret på KOLONNE ID: ${prop.columnValue.id}, Titel: ${localColumn.title}`);
+    if(columnDragStore.draggedColumn) {
+      console.log(`[Column.vue onDropCombined] id for draggedColumn: ${columnDragStore.draggedColumn.id}`);
       onDropColumn(e);
-    else if (cardDragStore.draggedCard)
+    }
+    else if (cardDragStore.draggedCard) {
+      console.log(`[Column.vue onDropCombined] id for draggedCard: ${cardDragStore.draggedCard.cardId}`);
       onDrop(e);
+    }
   }
 
   function onDragLeaveCombined () {
