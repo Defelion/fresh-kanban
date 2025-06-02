@@ -19,8 +19,13 @@ export function useCardDragAndDrop (
       description: string,
       columnId: string
     }) {
+    console.log('[useCardDragAndDrop onDragStart] STARTER. Rydder columnDragStore.');
+    console.log('[useCardDragAndDrop onDragStart] Før rydning: columnDragStore.draggedColumn:', JSON.stringify(columnDragStore.draggedColumn));
+
     columnDragStore.setHoverColumnId(null);
     columnDragStore.clearDraggedColumn();
+    console.log('[useCardDragAndDrop onDragStart] Efter rydning: columnDragStore.draggedColumn:', JSON.stringify(columnDragStore.draggedColumn));
+
     cardDragStore.setHoverCardId(null);
     cardDragStore.setHoverColumnId(null);
     cardDragStore.clearDraggedCard();
@@ -35,20 +40,24 @@ export function useCardDragAndDrop (
       cardDescription: cardValue.description,
       fromColumnId: cardValue.columnId,
     })
+    console.log('[useCardDragAndDrop onDragStart] cardDragStore.draggedCard SAT:', JSON.stringify(cardDragStore.draggedCard));
   }
 
   function onDragOver (e: DragEvent) {
     e.preventDefault()
+    console.log(`[useCardDragAndDrop onDragOver] the type is `, type);
     if (e.dataTransfer)
       e.dataTransfer.dropEffect = 'move';
-
     if (type === 'column') {
       cardDragStore.setHoverColumnId(id);
       const storeHoverCardId = cardDragStore.hoverCardId;
       if (storeHoverCardId) {
         const hoveredCard = cardStore.cards.find(c => c.id === storeHoverCardId);
-        if (!hoveredCard || hoveredCard.columnId !== id)
+        if (!hoveredCard || hoveredCard.columnId !== id) {
           cardDragStore.setHoverCardId(null);
+          cardDragStore.setHoverColumnId(null);
+          columnDragStore.setHoverColumnId(null);
+        }
       }
     } else if (type === 'card') {
       if (currentColumnId)
@@ -58,11 +67,9 @@ export function useCardDragAndDrop (
   }
 
   function onDragLeave () {
-    if (type === 'card' && cardDragStore.hoverCardId === id) {
-      cardDragStore.setHoverCardId(null);
-    } else if (type === 'column' && cardDragStore.hoverColumnId === id) {
-      cardDragStore.setHoverColumnId(null);
-    }
+    cardDragStore.setHoverCardId(null);
+    cardDragStore.setHoverColumnId(null);
+    columnDragStore.setHoverColumnId(null);
   }
 
   function onDrop (e: DragEvent) {
@@ -89,6 +96,7 @@ export function useCardDragAndDrop (
 
     cardDragStore.setHoverCardId(null);
     cardDragStore.setHoverColumnId(null);
+    columnDragStore.setHoverColumnId(null);
     cardDragStore.clearDraggedCard();
   }
 
@@ -102,6 +110,7 @@ export function useCardDragAndDrop (
       }
       cardDragStore.setHoverCardId(null);
       cardDragStore.setHoverColumnId(null);
+      columnDragStore.setHoverColumnId(null);
     }, 0)
   }
 

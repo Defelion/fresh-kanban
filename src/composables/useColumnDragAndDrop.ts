@@ -43,8 +43,9 @@ export function useColumnDragAndDrop (columnId: string, columnTitle: string) {
   }
 
   function onDragLeaveColumn () {
-    if (columnDragStore.hoverColumnId === columnId)
-      columnDragStore.setHoverColumnId(null);
+    cardDragStore.setHoverCardId(null);
+    cardDragStore.setHoverColumnId(null);
+    columnDragStore.setHoverColumnId(null);
   }
 
   function onDropColumn (e: DragEvent) {
@@ -57,6 +58,8 @@ export function useColumnDragAndDrop (columnId: string, columnTitle: string) {
     if(draggedColumn.id !== columnId)
       columnStore.moveColumn(draggedColumn.id, columnId)
 
+    cardDragStore.setHoverCardId(null);
+    cardDragStore.setHoverColumnId(null);
     columnDragStore.setHoverColumnId(null);
     columnDragStore.clearDraggedColumn();
   }

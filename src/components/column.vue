@@ -38,16 +38,22 @@
       onDragOver(e);
   }
 
+
+
   function onDropCombined (e: DragEvent) {
-    e.preventDefault()
     console.log(`[Column.vue onDropCombined] Drop registreret på KOLONNE ID: ${prop.columnValue.id}, Titel: ${localColumn.title}`);
+    e.preventDefault()
+    console.log('[Column.vue onDropCombined] FØR IF: columnDragStore.draggedColumn:', JSON.stringify(columnDragStore.draggedColumn));
+    console.log('[Column.vue onDropCombined] FØR IF: cardDragStore.draggedCard:', JSON.stringify(cardDragStore.draggedCard));
     if(columnDragStore.draggedColumn) {
-      console.log(`[Column.vue onDropCombined] id for draggedColumn: ${columnDragStore.draggedColumn.id}`);
+      console.log(`[Column.vue onDropCombined] GÅR IND I IF (columnDragStore.draggedColumn). ID for draggedColumn: ${columnDragStore.draggedColumn.id}`);
       onDropColumn(e);
     }
     else if (cardDragStore.draggedCard) {
-      console.log(`[Column.vue onDropCombined] id for draggedCard: ${cardDragStore.draggedCard.cardId}`);
+      console.log(`[Column.vue onDropCombined] GÅR IND I ELSE IF (cardDragStore.draggedCard). ID for draggedCard: ${cardDragStore.draggedCard.cardId}`);
       onDrop(e);
+    } else {
+      console.log('[Column.vue onDropCombined] INGEN DRAGGED ITEM FUNDET I STORES.');
     }
   }
 
@@ -72,7 +78,7 @@
     variant="tonal"
     @dragleave="onDragLeaveCombined"
     @dragover="onDragOverCombined"
-    @dragstart="onDragStartColumn"
+    @dragstart.self="onDragStartColumn"
     @drop="onDropCombined"
   >
     <v-row
