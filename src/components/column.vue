@@ -22,16 +22,14 @@
   watch(
     () => ({ ...localColumn }),
     (newValue, oldValue) => {
-      if (newValue.title !== oldValue.title) {
+      if (newValue.title !== oldValue.title)
         localColumnStore.updateColumn({ ...localColumn })
-      }
     }
   )
 
   function onDragOverCombined (e: DragEvent) {
     e.preventDefault()
     e.dataTransfer!.dropEffect = 'move';
-
     if(columnDragStore.draggedColumn)
       onDragOverColumn(e);
     else if (cardDragStore.draggedCard)
@@ -41,20 +39,11 @@
 
 
   function onDropCombined (e: DragEvent) {
-    console.log(`[Column.vue onDropCombined] Drop registreret på KOLONNE ID: ${prop.columnValue.id}, Titel: ${localColumn.title}`);
     e.preventDefault()
-    console.log('[Column.vue onDropCombined] FØR IF: columnDragStore.draggedColumn:', JSON.stringify(columnDragStore.draggedColumn));
-    console.log('[Column.vue onDropCombined] FØR IF: cardDragStore.draggedCard:', JSON.stringify(cardDragStore.draggedCard));
-    if(columnDragStore.draggedColumn) {
-      console.log(`[Column.vue onDropCombined] GÅR IND I IF (columnDragStore.draggedColumn). ID for draggedColumn: ${columnDragStore.draggedColumn.id}`);
+    if(columnDragStore.draggedColumn)
       onDropColumn(e);
-    }
-    else if (cardDragStore.draggedCard) {
-      console.log(`[Column.vue onDropCombined] GÅR IND I ELSE IF (cardDragStore.draggedCard). ID for draggedCard: ${cardDragStore.draggedCard.cardId}`);
+    else if (cardDragStore.draggedCard)
       onDrop(e);
-    } else {
-      console.log('[Column.vue onDropCombined] INGEN DRAGGED ITEM FUNDET I STORES.');
-    }
   }
 
   function onDragLeaveCombined () {

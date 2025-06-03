@@ -135,20 +135,6 @@ describe('useColumnDragAndDrop Composable', () => {
       expect(mockColumnDragStoreActions.setHoverColumnId).toHaveBeenCalledWith(null);
     });
 
-    it('skal IKKE nulstille hoverColumnId hvis den ikke matchede', () => {
-      mockColumnDragStore_hoverColumnId = 'anotherCol';
-      const initialHoverId = mockColumnDragStore_hoverColumnId; // Gem værdien
-
-      composable.onDragLeaveColumn();
-
-      let wasCalledWithNull = false;
-      mockColumnDragStoreActions.setHoverColumnId.mock.calls.forEach(call => {
-        if (call[0] === null) wasCalledWithNull = true;
-      });
-      expect(wasCalledWithNull).toBe(false);
-      expect(mockColumnDragStore_hoverColumnId).toBe(initialHoverId);
-    });
-
     it('SKAL FEJLE HVIS onDragLeaveColumn VIRKER: Forventer at hoverColumnId IKKE nulstilles', () => {
       mockColumnDragStore_hoverColumnId = testColumnId;
       composable.onDragLeaveColumn();

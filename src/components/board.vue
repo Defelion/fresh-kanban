@@ -13,19 +13,46 @@
     columnStore.addColumn();
   }
 
+  function handleBoardDragOver (e: DragEvent) {
+    if(columnDragStore.draggedColumn) {
+      e.preventDefault();
+      if (e.dataTransfer)
+        e.dataTransfer.dropEffect = 'move';
+
+      if(columnDragStore.hoverColumnId !== null)
+        columnDragStore.setHoverColumnId(null);
+    }
+  }
+
+  function handleBoardDrop (e: DragEvent) {
+    e.preventDefault();
+    const draggedColumn = columnDragStore.draggedColumn;
+
+    if(draggedColumn) {
+      if(columnDragStore.hoverColumnId === null)
+        columnStore.moveColumn(draggedColumn.id, null);
+    }
+  }
 </script>
 
 <template>
-  <v-container fluid>
+  <v-container
+    fluid
+    height="100%"
+    width="100%"
+    @dragover="handleBoardDragOver"
+    @drop="handleBoardDrop"
+  >
     <v-row v-if="columns.length > 0">
       <v-col
         v-for="(col) in columns"
         :key="col.id"
       >
-        <column :column-value="{
-          id: col.id,
-          title: ''
-        }"
+        <column
+          :column-value="{
+            id: col.id,
+            title: ''
+          }"
         />
       </v-col>
       <v-col cols="auto">

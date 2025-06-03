@@ -31,11 +31,8 @@ export function useColumnDragAndDrop (columnId: string, columnTitle: string) {
 
     const currentDraggedColumnInStore = columnDragStore.draggedColumn;
     const composableColumnId = columnId;
-    console.log('[onDragOverColumn DEBUG] Inden i funktion - columnId:', composableColumnId);
-    console.log('[onDragOverColumn DEBUG] Inden i funktion - columnDragStore.draggedColumn:', JSON.stringify(currentDraggedColumnInStore));
 
     if (currentDraggedColumnInStore) {
-      console.log('[onDragOverColumn DEBUG] Sammenligning:', currentDraggedColumnInStore.id, '!==', composableColumnId, 'Resultat:', currentDraggedColumnInStore.id !== composableColumnId);
     }
 
     if(columnDragStore.draggedColumn && columnDragStore.draggedColumn.id !== columnId)

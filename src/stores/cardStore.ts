@@ -1,5 +1,4 @@
 import { defineStore } from 'pinia';
-import {useCardDragStore} from "@/stores/cardDragStore.ts";
 
 interface Card {
   id: string;
@@ -33,16 +32,6 @@ export const useCardStore = defineStore('cardStore', {
     },
     moveCard (cardId: string, toColumnId: string, targetCardId?: string | null) {
       const index = this.cards.findIndex(card => card.id === cardId);
-
-      const cardDragStoreInstance = useCardDragStore(); // Hent instans for at tilgå draggedCard
-      const draggedCardDetails = cardDragStoreInstance.draggedCard;
-
-      console.log(
-        '[cardStore.moveCard] STARTER. Flytter kort:', cardId,
-        'Til kolonne:', toColumnId,
-        'Bestil før kort:', targetCardId,
-        'Kortets oprindelige kolonne var:', draggedCardDetails ? draggedCardDetails.fromColumnId : 'IKKE TILGÆNGELIG'
-      );
 
       if (index < 0) return;
 

@@ -24,17 +24,18 @@ export const useColumnStore = defineStore('coloumnStore', {
     },
     moveColumn (columnId: string, targetColumnId?: string | null) {
       const index = this.columns.findIndex(column => column.id === columnId);
+      let targetIndex = -1;
 
       if (index < 0) return;
 
       const [movedColumn] = this.columns.splice(index, 1);
 
-      let targetIndex = -1;
-
       if(targetColumnId)
         targetIndex = this.columns.findIndex(column => column.id === targetColumnId);
 
-      if(targetIndex < 0 || !targetColumnId) this.columns.push(movedColumn);
+      if(targetColumnId && targetIndex === this.columns.length -1)
+        this.columns.push(movedColumn);
+      else if(targetIndex < 0 || !targetColumnId) this.columns.push(movedColumn);
       else this.columns.splice(targetIndex, 0, movedColumn);
     },
   },
