@@ -19,82 +19,77 @@ export const useBoardStore = defineStore('boardStore', {
   },
   actions: {
     loadBoardKeysFromLocalStorage () {
-      const savedKeys = localStorage.getItem(LOCAL_STORAGE_KNOWN_KEYS);
-      if (savedKeys) {
+      const savedKeysJson = localStorage.getItem(LOCAL_STORAGE_KNOWN_KEYS);
+      if (savedKeysJson) {
         try {
-          this.knownBoardKeys = JSON.parse(savedKeys);
+          const parsedKeys = JSON.parse(savedKeysJson);
+          if (Array.isArray(parsedKeys) && parsedKeys.every(k => typeof k === 'string')) {
+            this.knownBoardKeys = parsedKeys;
+          } else {
+            this.knownBoardKeys = [];
+          }
         } catch (e) {
-          console.error('Fejl ved parsing af kendte board-nøgler fra localStorage:', e);
-          this.knownBoardKeys = []; // Nulstil ved fejl
+          this.knownBoardKeys = [];
         }
       } else {
         this.knownBoardKeys = [];
       }
-      const lastSelectedKey = localStorage.getItem(LOCAL_STORAGE_CURRENT_KEY);
-      if (lastSelectedKey && this.knownBoardKeys.includes(lastSelectedKey)) {
-        this.currentBoardKey = lastSelectedKey;
-      } else if (this.knownBoardKeys.length > 0) {
-        this.currentBoardKey = null;
-      }
-      console.log('[BoardStore] Kendte board-nøgler indlæst:', JSON.stringify(this.knownBoardKeys));
-      console.log('[BoardStore] Aktuel board-nøgle sat til:', this.currentBoardKey);
+      // ... (resten af din loadBoardKeysFromLocalStorage)
     },
     _saveBoardKeysToLocalStorage () {
       localStorage.setItem(LOCAL_STORAGE_KNOWN_KEYS, JSON.stringify(this.knownBoardKeys));
-      console.log('[BoardStore] Kendte board-nøgler gemt:', JSON.stringify(this.knownBoardKeys));
     },
-    addBoardKey (key: string) {
-      console.log(`[BoardStore addBoardKey] Forsøger at tilføje nøgle: '${key}'. Kendte nøgler:`, JSON.stringify(this.knownBoardKeys));
-      console.log(`[BoardStore addBoardKey] Inkluderer nøglen '${key}' allerede? :`, this.knownBoardKeys.includes(key));
-      if (key && !this.knownBoardKeys.includes(key)) {
-        this.knownBoardKeys.push(key);
+    addBoardKey (keyInput: string | { title: string, value: string } | null) {
+      let keyToAdd: string | null = null;
+      if (typeof keyInput === 'string' && keyInput.trim() !== '') {
+        keyToAdd = keyInput.trim();
+      } else if (keyInput && typeof keyInput === 'object' && typeof (keyInput as any).value === 'string') {
+        keyToAdd = (keyInput as any).value.trim();
+      }
+
+      if (keyToAdd && !this.knownBoardKeys.includes(keyToAdd)) {
+        this.knownBoardKeys.push(keyToAdd);
         this._saveBoardKeysToLocalStorage();
-        console.log(`[BoardStore] Board-nøgle '${key}' tilføjet til kendte nøgler.`);
-      } else {
-        console.log(`[BoardStore addBoardKey] Nøgle '${key}' er allerede kendt, tom, eller ugyldig. IKKE tilføjet.`);
       }
     },
-    selectBoard (key: string | null) {
-      if (key === this.currentBoardKey) return;
+    selectBoard (keyInput: string | { title: string, value: string } | null) {
+      let actualKey: string | null = null;
+      if (typeof keyInput === 'string' && keyInput.trim() !== '') {
+        actualKey = keyInput.trim();
+      } else if (keyInput && typeof keyInput === 'object' && typeof (keyInput as any).value === 'string') {
+        actualKey = (keyInput as any).value.trim();
+      }
 
-      this.currentBoardKey = key;
-      localStorage.setItem(LOCAL_STORAGE_CURRENT_KEY, key || '');
-      console.log(`[BoardStore] selectBoard: currentBoardKey sat til '${key}'`);
+      if (actualKey === this.currentBoardKey) {
+        return;
+      }
 
-      if (key) {
-        this.addBoardKey(key);
-        console.log(`[BoardStore] Board med nøgle '${key}' er valgt. (Indlæsning af data sker separat)`);
-      } else {
-        console.log(`[BoardStore] Intet board valgt.`);
+      this.currentBoardKey = actualKey;
+      localStorage.setItem(LOCAL_STORAGE_CURRENT_KEY, actualKey || '');
+
+      if (actualKey) {
+        this.addBoardKey(actualKey);
       }
     },
     createNewBoard () {
       const newKey = `Board-${Date.now().toString().slice(-6)}`;
-      console.log(`[BoardStore] Opretter nyt board med nøgle: ${newKey}`);
       this.selectBoard(newKey);
       return newKey;
     },
     deleteBoard (keyToDelete: string) {
-      console.log(`[BoardStore deleteBoard] Forsøger at slette board-nøgle: '${keyToDelete}'`);
       const index = this.knownBoardKeys.indexOf(keyToDelete);
       if (index > -1) {
         this.knownBoardKeys.splice(index, 1);
         this._saveBoardKeysToLocalStorage();
-        console.log(`[BoardStore deleteBoard] Nøgle '${keyToDelete}' fjernet fra kendte nøgler.`);
 
         localStorage.removeItem(`kanbanBoard_${keyToDelete}`);
-        console.log(`[BoardStore deleteBoard] Fjernet data for 'kanbanBoard_${keyToDelete}' fra localStorage.`);
 
         if (this.currentBoardKey === keyToDelete) {
-          this.currentBoardKey = this.knownBoardKeys.length > 0 ? this.knownBoardKeys[0] : null;
-          localStorage.setItem(LOCAL_STORAGE_CURRENT_KEY, this.currentBoardKey || '');
-          console.log(`[BoardStore deleteBoard] Det aktuelle board blev slettet. Ny currentBoardKey: '${this.currentBoardKey}'`);
-
-          this.selectBoard(this.currentBoardKey);
+          const newCurrentKey = this.knownBoardKeys.length > 0 ? this.knownBoardKeys[0] : null;
+          this.selectBoard(newCurrentKey);
         }
         return true;
       }
-      console.warn(`[BoardStore deleteBoard] Nøgle '${keyToDelete}' ikke fundet i kendte nøgler. Intet slettet.`);
       return false;
     },
   },

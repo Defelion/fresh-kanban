@@ -23,9 +23,17 @@
     selectedBoardKeyInput.value = boardStore.currentBoardKey;
   });
 
-  watch(selectedBoardKeyInput, newKey => {
-    if (newKey !== boardStore.currentBoardKey) {
-      boardStore.selectBoard(newKey);
+  watch(selectedBoardKeyInput, newKeyValueFromCombobox => {
+    let keyToSelect: string | null = null;
+    if (typeof newKeyValueFromCombobox === 'string') {
+      keyToSelect = newKeyValueFromCombobox;
+    } else if (newKeyValueFromCombobox && typeof newKeyValueFromCombobox === 'object' && 'value' in newKeyValueFromCombobox) {
+      keyToSelect = (newKeyValueFromCombobox as any).value;
+    } else if (newKeyValueFromCombobox === null) {
+      keyToSelect = null;
+    }
+    if (keyToSelect !== boardStore.currentBoardKey) {
+      boardStore.selectBoard(keyToSelect);
     }
   });
 
