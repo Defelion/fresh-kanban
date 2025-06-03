@@ -7,6 +7,10 @@ interface Board {
 const LOCAL_STORAGE_KNOWN_KEYS = 'kanbanKnownBoardKeys';
 const LOCAL_STORAGE_CURRENT_KEY = 'kanbanCurrentBoardKey';
 
+const getCardsLocalStorageKey = (boardKey: string) => `kanbanCards_${boardKey}`;
+const getColumnsLocalStorageKey = (boardKey: string) => `kanbanColumns_${boardKey}`;
+
+
 export const useBoardStore = defineStore('boardStore', {
   state: () => ({
     knownBoardKeys: [] as string[],
@@ -34,7 +38,14 @@ export const useBoardStore = defineStore('boardStore', {
       } else {
         this.knownBoardKeys = [];
       }
-      // ... (resten af din loadBoardKeysFromLocalStorage)
+      const lastActiveKey = localStorage.getItem(LOCAL_STORAGE_CURRENT_KEY);
+      if (lastActiveKey && this.knownBoardKeys.includes(lastActiveKey)) {
+        this.currentBoardKey = lastActiveKey;
+      } else if (this.knownBoardKeys.length > 0) {
+        this.currentBoardKey = this.knownBoardKeys[0];
+      } else {
+        this.currentBoardKey = null;
+      }
     },
     _saveBoardKeysToLocalStorage () {
       localStorage.setItem(LOCAL_STORAGE_KNOWN_KEYS, JSON.stringify(this.knownBoardKeys));
@@ -60,7 +71,7 @@ export const useBoardStore = defineStore('boardStore', {
         actualKey = (keyInput as any).value.trim();
       }
 
-      if (actualKey === this.currentBoardKey) {
+      if (actualKey === this.currentBoardKey && this.currentBoardKey !== null) { // Undgå unødig re-selection, medmindre det er for at initialisere
         return;
       }
 
@@ -73,6 +84,7 @@ export const useBoardStore = defineStore('boardStore', {
     },
     createNewBoard () {
       const newKey = `Board-${Date.now().toString().slice(-6)}`;
+      this.addBoardKey(newKey);
       this.selectBoard(newKey);
       return newKey;
     },
@@ -83,6 +95,8 @@ export const useBoardStore = defineStore('boardStore', {
         this._saveBoardKeysToLocalStorage();
 
         localStorage.removeItem(`kanbanBoard_${keyToDelete}`);
+        localStorage.removeItem(getCardsLocalStorageKey(keyToDelete));
+        localStorage.removeItem(getColumnsLocalStorageKey(keyToDelete));
 
         if (this.currentBoardKey === keyToDelete) {
           const newCurrentKey = this.knownBoardKeys.length > 0 ? this.knownBoardKeys[0] : null;
