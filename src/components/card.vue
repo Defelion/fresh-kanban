@@ -1,6 +1,6 @@
 <script setup lang="ts">
   import { reactive, watch } from 'vue'
-  import { useCardStore } from '@/stores/cardStore.ts';
+  import { useCardStore } from '@/stores/card/cardStore.ts';
   import { useCardDragAndDrop } from '@/composables/useCardDragAndDrop.ts';
 
   const cardStore = useCardStore();

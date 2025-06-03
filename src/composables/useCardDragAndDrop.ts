@@ -1,6 +1,6 @@
-import { useCardStore } from '@/stores/cardStore.ts';
-import { useCardDragStore } from '@/stores/cardDragStore.ts';
-import { useColumnDragStore } from '@/stores/columnDragStore.ts';
+import { useCardStore } from '@/stores/card/cardStore.ts';
+import { useCardDragStore } from '@/stores/card/cardDragStore.ts';
+import { useColumnDragStore } from '@/stores/column/columnDragStore.ts';
 
 export function useCardDragAndDrop (
   type: 'card' | 'column',

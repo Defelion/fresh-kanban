@@ -1,8 +1,8 @@
 <script setup lang="ts">
   import Column from '@/components/column.vue'
   import { computed } from 'vue';
-  import { useColumnStore } from '@/stores/columnStore.ts';
-  import { useColumnDragStore } from '@/stores/columnDragStore.ts';
+  import { useColumnStore } from '@/stores/column/columnStore.ts';
+  import { useColumnDragStore } from '@/stores/column/columnDragStore.ts';
 
   const columnStore = useColumnStore();
   const columnDragStore = useColumnDragStore();

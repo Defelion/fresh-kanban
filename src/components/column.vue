@@ -3,9 +3,9 @@
   import { useCardDragAndDrop } from '@/composables/useCardDragAndDrop.ts';
   import { useColumnDragAndDrop } from '@/composables/useColumnDragAndDrop.ts';
   import CardListView from '@/components/cardListView.vue';
-  import { useColumnDragStore } from '@/stores/columnDragStore.ts';
-  import { useCardDragStore } from '@/stores/cardDragStore.ts';
-  import { useColumnStore } from '@/stores/columnStore.ts';
+  import { useColumnDragStore } from '@/stores/column/columnDragStore.ts';
+  import { useCardDragStore } from '@/stores/card/cardDragStore.ts';
+  import { useColumnStore } from '@/stores/column/columnStore.ts';
 
   const prop = defineProps<{
     columnValue: { id: string, title: string }

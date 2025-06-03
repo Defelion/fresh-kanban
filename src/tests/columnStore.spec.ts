@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { useColumnStore } from '@/stores/columnStore.ts'; // Juster stien efter din mappestruktur
+import { useColumnStore } from '@/stores/column/columnStore.ts'; // Juster stien efter din mappestruktur
 
 describe('Column Store', () => {
   beforeEach(() => {

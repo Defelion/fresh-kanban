@@ -74,6 +74,7 @@ export const useBoardStore = defineStore('boardStore', {
     createNewBoard () {
       const newKey = `Board-${Date.now().toString().slice(-6)}`;
       this.selectBoard(newKey);
+      this.setCurrentBoardKeyOnly(newKey);
       return newKey;
     },
     deleteBoard (keyToDelete: string) {
@@ -91,6 +92,17 @@ export const useBoardStore = defineStore('boardStore', {
         return true;
       }
       return false;
+    },
+    setCurrentBoardKeyOnly (key: string | null) {
+      let processedKey: string | null = null;
+      if (typeof key === 'string' && key.trim() !== '') {
+        processedKey = key.trim();
+      }
+      if (processedKey === this.currentBoardKey) return;
+
+      this.currentBoardKey = processedKey;
+      localStorage.setItem(LOCAL_STORAGE_CURRENT_KEY, processedKey || '');
+      console.log(`[BoardStore setCurrentBoardKeyOnly] currentBoardKey sat til '${processedKey}'`);
     },
   },
 });

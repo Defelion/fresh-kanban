@@ -1,6 +1,6 @@
 import { describe, it, expect, beforeEach } from 'vitest';
 import { setActivePinia, createPinia } from 'pinia';
-import { useCardStore } from '@/stores/cardStore.ts';
+import { useCardStore } from '@/stores/card/cardStore.ts';
 
 describe('Card Store', () => {
   beforeEach(() => {

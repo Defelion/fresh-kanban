@@ -1,10 +1,12 @@
 <script setup lang="ts">
   import { useTheme } from 'vuetify'
-  import { useBoardStore } from '@/stores/boardStore';
+  import { useBoardStore } from '@/stores/board/boardStore.ts';
+  import { useBoardDBStore } from '@/stores/board/boardDBStore.ts';
   import { onMounted, ref, watch } from 'vue';
 
   const theme = useTheme()
   const boardStore = useBoardStore();
+  const boardDBStore = useBoardDBStore();
 
   const themeIcon = computed(() => {
     return theme.global.current.value.dark ? 'mdi-weather-night' : 'mdi-weather-sunny';
@@ -18,9 +20,15 @@
   const showDeleteConfirmDialog = ref(false);
   const boardToDelete = ref<string | null>(null);
 
-  onMounted(() => {
+  onMounted(async () => {
     boardStore.loadBoardKeysFromLocalStorage();
     selectedBoardKeyInput.value = boardStore.currentBoardKey;
+    if (boardStore.currentBoardKey) {
+      console.log(`[AppHeader onMounted] Initial board key: ${boardStore.currentBoardKey}. Starter DB synkronisering.`);
+      await boardDBStore.ensureBoardExistsInDB(boardStore.currentBoardKey);
+    } else {
+      console.log('[AppHeader onMounted] Ingen gemt currentBoardKey, intet board indlæses fra DB initialt.');
+    }
   });
 
   watch(selectedBoardKeyInput, newKeyValueFromCombobox => {
@@ -34,6 +42,40 @@
     }
     if (keyToSelect !== boardStore.currentBoardKey) {
       boardStore.selectBoard(keyToSelect);
+    }
+  });
+
+  watch(selectedBoardKeyInput, async (newKey, oldKey) => { // Gør watcher async
+    if (newKey === oldKey) return; // Ingen reel ændring
+
+    let keyToProcess: string | null = null;
+    if (typeof newKey === 'string') {
+      keyToProcess = newKey.trim() === '' ? null : newKey.trim();
+    } else if (newKey && typeof newKey === 'object' && 'value' in newKey) {
+      keyToProcess = (newKey as any).value.trim(); // Uddrag streng-nøglen
+      if (keyToProcess === '') keyToProcess = null;
+    }
+
+    console.log(`[AppHeader watch] selectedBoardKeyInput ændret. Behandlet nøgle: '${keyToProcess}'`);
+
+    boardStore.setCurrentBoardKeyOnly(keyToProcess);
+    if (keyToProcess) {
+      boardStore.addBoardKey(keyToProcess);
+    }
+
+    if (keyToProcess) {
+      const boardRecord = await boardDBStore.ensureBoardExistsInDB(keyToProcess);
+      if (boardRecord) {
+        console.log(`[AppHeader watch] Board '${keyToProcess}' synkroniseret/hentet fra DB.`);
+      } else {
+        console.warn(`[AppHeader watch] Board '${keyToProcess}' kunne ikke hentes eller oprettes i DB.`);
+      }
+    } else {
+      console.log('[AppHeader watch] Intet board valgt. Rydder board-data.');
+      boardDBStore.clearCurrentBoardData();
+      //useColumnStore().$reset();
+      //useCardStore().$reset();
+      boardDBStore.unsubscribeFromBoardUpdates();
     }
   });
 

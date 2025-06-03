@@ -1,5 +1,5 @@
 <script setup lang="ts">
-  import { useCardStore } from '@/stores/cardStore.ts';
+  import { useCardStore } from '@/stores/card/cardStore.ts';
 
   const cardStore = useCardStore();
   const prop = defineProps<{
