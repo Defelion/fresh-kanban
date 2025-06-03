@@ -15,6 +15,8 @@
   });
 
   const selectedBoardKeyInput = ref<string | null>(null);
+  const showDeleteConfirmDialog = ref(false);
+  const boardToDelete = ref<string | null>(null);
 
   onMounted(() => {
     boardStore.loadBoardKeysFromLocalStorage();
@@ -39,6 +41,28 @@
 
   function handleCreateNewBoard () {
     boardStore.createNewBoard();
+  }
+
+  function requestDeleteCurrentBoard () {
+    if (boardStore.currentBoardKey) {
+      boardToDelete.value = boardStore.currentBoardKey;
+      showDeleteConfirmDialog.value = true;
+    } else {
+      console.warn('Intet board valgt til sletning.');
+    }
+  }
+
+  function confirmDelete () {
+    if (boardToDelete.value) {
+      boardStore.deleteBoard(boardToDelete.value);
+    }
+    showDeleteConfirmDialog.value = false;
+    boardToDelete.value = null;
+  }
+
+  function cancelDelete () {
+    showDeleteConfirmDialog.value = false;
+    boardToDelete.value = null;
   }
 
 </script>
@@ -77,6 +101,17 @@
         </v-col>
         <v-col cols="auto">
           <v-btn
+            v-if="boardStore.currentBoardKey"
+            class="ml-1"
+            color="error"
+            icon="mdi-delete-outline"
+            title="Slet nuværende board"
+            variant="text"
+            @click="requestDeleteCurrentBoard"
+          />
+        </v-col>
+        <v-col cols="auto">
+          <v-btn
             class="ml-1"
             :icon="themeIcon"
             :title="themeButtonTitle"
@@ -87,6 +122,27 @@
       </v-row>
     </v-container>
   </v-app-bar>
+
+  <v-dialog v-model="showDeleteConfirmDialog" max-width="400" persistent>
+    <v-card>
+      <v-card-title class="headline">
+        Bekræft Sletning
+      </v-card-title>
+      <v-card-text>
+        Er du sikker på, du vil slette boardet "<strong>{{ boardToDelete }}</strong>"? <br>
+        Denne handling kan ikke fortrydes.
+      </v-card-text>
+      <v-card-actions>
+        <v-spacer />
+        <v-btn color="grey darken-1" text @click="cancelDelete">
+          Annuller
+        </v-btn>
+        <v-btn color="error darken-1" text @click="confirmDelete">
+          Slet Board
+        </v-btn>
+      </v-card-actions>
+    </v-card>
+  </v-dialog>
 </template>
 
 <style scoped lang="sass">
